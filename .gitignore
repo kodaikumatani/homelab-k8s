@@ -1,0 +1,15 @@
+# Talos secrets (contains cluster certificates and keys)
+secrets.yaml
+talosconfig
+kubeconfig
+controlplane.yaml
+worker.yaml
+
+# Talos images
+*.raw.xz
+
+# VPN
+*.ovpn
+
+# OS
+.DS_Store

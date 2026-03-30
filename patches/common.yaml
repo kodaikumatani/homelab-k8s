@@ -1,0 +1,7 @@
+# Common patches for all nodes
+machine:
+  install:
+    disk: /dev/mmcblk0
+  time:
+    servers:
+      - ntp.nict.jp
