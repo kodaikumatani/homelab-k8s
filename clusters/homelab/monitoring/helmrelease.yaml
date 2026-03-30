@@ -18,8 +18,7 @@ spec:
       adminPassword: admin
       grafana.ini:
         server:
-          root_url: "https://oya345.tplinkdns.com/grafana"
-          serve_from_sub_path: true
+          root_url: "https://grafana.keleveni.com"
       service:
         type: ClusterIP
     prometheus:
