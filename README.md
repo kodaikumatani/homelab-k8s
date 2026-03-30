@@ -17,41 +17,89 @@ Talos Linux K8s cluster on Raspberry Pi 5 × 3.
 - [talosctl](https://www.talos.dev/latest/introduction/getting-started/#talosctl)
 - kubectl
 
-## Plan
+## Setup
 
-### Step 1: Talos Linux のインストール
+### 1. secrets 生成 (初回のみ)
 
-- [x] Talos Linux の Raspberry Pi 5 用イメージをダウンロード
-- [x] 各 SD カードにイメージを書き込み
-- [x] 各 Pi を有線 LAN に接続して起動
-- [x] 各 Pi の IP アドレスを確認・固定
+```bash
+talosctl gen secrets -o secrets.yaml
+```
 
-### Step 2: クラスタの初期設定
+### 2. config 生成
 
-- [x] talosctl をインストール
-- [x] secrets を生成 (`talosctl gen secrets`)
-- [x] control plane / worker のコンフィグを生成 (`talosctl gen config`)
-- [x] 各ノードにコンフィグを適用 (`talosctl apply-config`)
-- [x] クラスタをブートストラップ (`talosctl bootstrap`)
-- [x] kubeconfig を取得
+```bash
+talosctl gen config homelab-k8s https://192.168.1.100:6443 \
+  --with-secrets secrets.yaml \
+  --install-disk /dev/nvme0n1 \
+  -o . -f
+```
 
-### Step 3: クラスタの動作確認
+生成されるファイル: `controlplane.yaml`, `worker.yaml`, `talosconfig`
 
-- [ ] `kubectl get nodes` で全ノードが Ready になることを確認
-- [ ] テスト用 Pod をデプロイして動作確認
-- [ ] Pod が worker ノードにスケジュールされることを確認
+### 3. talosconfig の設定
 
-### Step 4: VPN (WireGuard) の構築
+```bash
+talosctl config merge talosconfig
+# context 名を確認して切り替え
+talosctl config context <context-name>
+talosctl config endpoint 192.168.1.100
+talosctl config node 192.168.1.100
+```
 
-- [ ] WireGuard を K8s 上にデプロイ
-- [ ] ルーターでポートフォワーディング設定
-- [ ] 外部から VPN 接続できることを確認
+### 4. config apply (各ノードがメンテナンスモードで起動している状態で)
 
-### Step 5: 運用・発展
+```bash
+# Control Plane
+talosctl apply-config -n 192.168.1.100 -f controlplane.yaml \
+  --config-patch @patches/volume-ephemeral-nvme.yaml --insecure
 
-- [ ] monitoring (Prometheus + Grafana) の導入
-- [ ] GitOps (Flux or ArgoCD) の導入
-- [ ] worker ノード障害時の挙動を検証
+# Worker 1
+talosctl apply-config -n 192.168.1.101 -f worker.yaml \
+  --config-patch @patches/volume-ephemeral-nvme.yaml --insecure
+
+# Worker 2
+talosctl apply-config -n 192.168.1.102 -f worker.yaml \
+  --config-patch @patches/volume-ephemeral-nvme.yaml --insecure
+```
+
+### 5. bootstrap (初回のみ、CP で実行)
+
+```bash
+talosctl bootstrap -n 192.168.1.100
+```
+
+### 6. kubeconfig 取得
+
+```bash
+talosctl -n 192.168.1.100 kubeconfig --force
+```
+
+### 7. 動作確認
+
+```bash
+# ノード確認
+kubectl get nodes
+
+# EPHEMERAL が NVMe にあることを確認
+talosctl -n 192.168.1.100 get discoveredvolumes | grep EPHEMERAL
+
+# etcd 安定確認
+talosctl -n 192.168.1.100 service etcd
+```
+
+### ノードの再セットアップ
+
+SD カード入れ替えなどで再セットアップする場合:
+
+```bash
+# STATE/EPHEMERAL をワイプ (BOOT は残るので SD カードブートは壊れない)
+talosctl -n <node-ip> reset --system-labels-to-wipe STATE,EPHEMERAL \
+  --reboot --graceful=false
+
+# メンテナンスモードで起動後、config apply
+talosctl apply-config -n <node-ip> -f <controlplane|worker>.yaml \
+  --config-patch @patches/volume-ephemeral-nvme.yaml --insecure
+```
 
 ---
 
