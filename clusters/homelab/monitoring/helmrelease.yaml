@@ -15,7 +15,10 @@ spec:
       interval: 1h
   values:
     grafana:
-      adminPassword: admin
+      admin:
+        existingSecret: grafana-admin
+        userKey: admin-user
+        passwordKey: admin-password
       grafana.ini:
         server:
           root_url: "https://grafana.keleveni.com"
