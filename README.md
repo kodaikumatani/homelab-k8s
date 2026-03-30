@@ -64,14 +64,29 @@ graph LR
   end
 ```
 
-### Nodes
+### Pod Layout
 
 ```mermaid
 graph TB
-  subgraph K8s Cluster
-    CP[cp-1<br>192.168.1.100<br>Control Plane<br>RPi5 + NVMe]
-    W1[worker-1<br>192.168.1.101<br>RPi5 + NVMe]
-    W2[worker-2<br>192.168.1.102<br>RPi5 + NVMe]
+  subgraph cp-1 [cp-1 / 192.168.1.100 / Control Plane]
+    CP_NE[node-exporter]
+    CP_MS[metallb-speaker]
+  end
+  subgraph worker-1 [worker-1 / 192.168.1.101]
+    W1_GF[Grafana]
+    W1_PM[Prometheus]
+    W1_NE[node-exporter]
+    W1_MS[metallb-speaker]
+  end
+  subgraph worker-2 [worker-2 / 192.168.1.102]
+    W2_CD1[cloudflared]
+    W2_CD2[cloudflared]
+    W2_IG[ingress-nginx]
+    W2_CM[cert-manager]
+    W2_MC[metallb-controller]
+    W2_KSM[kube-state-metrics]
+    W2_NE[node-exporter]
+    W2_MS[metallb-speaker]
   end
 ```
 
