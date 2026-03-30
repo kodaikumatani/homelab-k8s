@@ -1,0 +1,4 @@
+# Control plane specific patches
+machine:
+  network:
+    hostname: cp-1
