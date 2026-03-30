@@ -86,7 +86,14 @@ talosctl bootstrap -n 192.168.1.100
 talosctl -n 192.168.1.100 kubeconfig --force
 ```
 
-### 7. 動作確認
+### 7. Worker ノードにロールラベルを付与
+
+```bash
+kubectl label node talos-7pd-pv6 node-role.kubernetes.io/worker=
+kubectl label node talos-7sd-211 node-role.kubernetes.io/worker=
+```
+
+### 8. 動作確認
 
 ```bash
 # ノード確認

@@ -1,0 +1,34 @@
+replicaCount: 1
+
+image:
+  repository: openvpn/openvpn-as
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  ports:
+    admin: 943
+    tcp: 443
+    udp: 1194
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: local-path
+  accessMode: ReadWriteOnce
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1536Mi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+securityContext:
+  privileged: true
+  capabilities:
+    add:
+      - NET_ADMIN
+      - MKNOD
