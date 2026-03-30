@@ -15,3 +15,5 @@ spec:
   values:
     crds:
       enabled: true
+    extraArgs:
+      - --acme-http01-solver-nameservers=8.8.8.8:53,1.1.1.1:53
