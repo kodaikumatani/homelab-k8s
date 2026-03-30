@@ -17,3 +17,16 @@ spec:
       enabled: true
     extraArgs:
       - "--acme-http01-solver-nameservers=8.8.8.8:53"
+      - "--dns01-recursive-nameservers=8.8.8.8:53"
+      - "--dns01-recursive-nameservers-only"
+    podDnsPolicy: None
+    podDnsConfig:
+      nameservers:
+        - "10.96.0.10"
+      searches:
+        - cert-manager.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+      options:
+        - name: ndots
+          value: "1"
