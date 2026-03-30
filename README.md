@@ -21,6 +21,59 @@ Talos Linux K8s cluster on Raspberry Pi 5 × 3.
 | Proxy | kube-proxy (iptables) |
 | DNS | CoreDNS |
 | Storage | EPHEMERAL on NVMe (VolumeConfig), boot on SD card |
+| Load Balancer | MetalLB (L2 mode, 192.168.1.200-210) |
+| Ingress | ingress-nginx |
+| Certificate | cert-manager + Let's Encrypt (Cloudflare DNS-01) |
+| Tunnel | Cloudflare Tunnel (cloudflared x2) |
+| GitOps | Flux v2 |
+
+## Service Architecture
+
+### External Access (via Cloudflare Tunnel)
+
+```mermaid
+graph LR
+  Internet --> CF[Cloudflare Edge<br>grafana.keleveni.com]
+  CF -- "outbound tunnel<br>(no port open)" --> CD[cloudflared x2]
+  subgraph K8s Cluster
+    CD --> GF[Grafana]
+    PM[Prometheus] --> GF
+    NE[node-exporter<br>per node] --> PM
+  end
+```
+
+### LAN Access (via MetalLB + Ingress)
+
+```mermaid
+graph LR
+  LAN --> ML[MetalLB<br>192.168.1.200]
+  subgraph K8s Cluster
+    ML --> NG[ingress-nginx<br>TLS termination]
+    CM[cert-manager<br>Let's Encrypt] -.-> NG
+    NG --> GF[Grafana]
+  end
+```
+
+### GitOps (Flux)
+
+```mermaid
+graph LR
+  GH[GitHub<br>homelab-k8s] -- poll --> FX[Flux]
+  subgraph K8s Cluster
+    FX -- auto deploy --> HR[HelmReleases<br>monitoring, metallb,<br>ingress-nginx, cert-manager,<br>cloudflare-tunnel]
+  end
+```
+
+### Nodes
+
+```mermaid
+graph TB
+  subgraph K8s Cluster
+    CP[cp-1<br>192.168.1.100<br>Control Plane<br>RPi5 + NVMe]
+    W1[worker-1<br>192.168.1.101<br>RPi5 + NVMe]
+    W2[worker-2<br>192.168.1.102<br>RPi5 + NVMe]
+  end
+```
 
 ## Prerequisites
 
