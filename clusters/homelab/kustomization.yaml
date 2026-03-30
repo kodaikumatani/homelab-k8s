@@ -5,6 +5,5 @@ resources:
   - metallb
   - ingress-nginx
   - cert-manager
-  - cloudflare-ddns
   - cloudflare-tunnel
   - monitoring
