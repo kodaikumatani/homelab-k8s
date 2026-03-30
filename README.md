@@ -10,6 +10,18 @@ Talos Linux K8s cluster on Raspberry Pi 5 × 3.
 | worker-1 | Worker | 192.168.1.101 |
 | worker-2 | Worker | 192.168.1.102 |
 
+## Cluster Architecture
+
+| Component | Value |
+|-----------|-------|
+| OS | Talos Linux v1.12.6 |
+| Kubernetes | v1.35.2 |
+| Container Runtime | containerd 2.1.6 |
+| CNI | Flannel v0.27.4 |
+| Proxy | kube-proxy (iptables) |
+| DNS | CoreDNS |
+| Storage | EPHEMERAL on NVMe (VolumeConfig), boot on SD card |
+
 ## Prerequisites
 
 - Raspberry Pi 5 × 3
